@@ -46,8 +46,8 @@ def show_all_pokemons(request):
     for pokemon in pokemons:
         try:
             image_url = request.build_absolute_uri(pokemon.image.url)
-        except ValueError:
-            image_url = None
+        except:
+            image_url = DEFAULT_IMAGE_URL
         pokemons_on_page.append({
             'pokemon_id': pokemon.id,
             'img_url': image_url,
