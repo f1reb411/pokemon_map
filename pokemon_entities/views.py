@@ -75,7 +75,8 @@ def show_pokemon(request, pokemon_id):
     pokemons = {
         'pokemon_id': pokemon_id,
         'title_ru': requested_pokemon.title,
-        'img_url': image_url
+        'img_url': image_url,
+        'description': requested_pokemon.description
     }
 
     for pokemon_entity in requested_pokemon_entities:
