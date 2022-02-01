@@ -62,6 +62,7 @@ def show_all_pokemons(request):
 
 
 def show_pokemon(request, pokemon_id):
+    pokemon_id = int(pokemon_id)
     try:
         requested_pokemon = Pokemon.objects.get(id=pokemon_id)
     except ObjectDoesNotExist:
@@ -72,13 +73,43 @@ def show_pokemon(request, pokemon_id):
     requested_pokemon_entities = PokemonEntity.objects.filter(pokemon=requested_pokemon)
     image_url = request.build_absolute_uri(requested_pokemon.image.url)
 
+    previous_evolution = None
+    next_evolution = None
+
+    if requested_pokemon.previous_evolution:
+        try:
+            previous_evolution_image_url = request.build_absolute_uri(requested_pokemon.previous_evolution.image.url)
+        except AttributeError:
+            previous_evolution_image_url = None
+        previous_evolution = {
+            'pokemon_id': pokemon_id - 1,
+            'title_ru': requested_pokemon.previous_evolution.title_ru,
+            'img_url': previous_evolution_image_url
+        }
+
+    next_pokemon = requested_pokemon.next_evolution.first()
+
+    if next_pokemon:
+        try:
+            title = Pokemon.objects.get(title_ru=next_pokemon)
+            next_evolution_image_url = request.build_absolute_uri(title.image.url)
+        except AttributeError:
+            next_evolution_image_url = None
+        next_evolution = {
+            'pokemon_id': pokemon_id + 1,
+            'title_ru': title,
+            'img_url': next_evolution_image_url
+        }
+
     pokemons = {
         'pokemon_id': pokemon_id,
         'title_ru': requested_pokemon.title_ru,
         'title_en': requested_pokemon.title_en,
         'title_jp': requested_pokemon.title_jp,
         'img_url': image_url,
-        'description': requested_pokemon.description
+        'description': requested_pokemon.description,
+        'previous_evolution': previous_evolution,
+        'next_evolution': next_evolution
     }
 
     for pokemon_entity in requested_pokemon_entities:
