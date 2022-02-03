@@ -1,8 +1,7 @@
 import folium
-
+from django.core.exceptions import ObjectDoesNotExist, MultipleObjectsReturned
 from django.http import HttpResponseNotFound
 from django.shortcuts import render
-from django.core.exceptions import ObjectDoesNotExist
 
 from .models import Pokemon, PokemonEntity
 
@@ -62,15 +61,17 @@ def show_all_pokemons(request):
 
 
 def show_pokemon(request, pokemon_id):
-    pokemon_id = int(pokemon_id)
+
     try:
         requested_pokemon = Pokemon.objects.get(id=pokemon_id)
     except ObjectDoesNotExist:
         return HttpResponseNotFound('<h1>Такой покемон не найден</h1>')
+    except MultipleObjectsReturned:
+        return HttpResponseNotFound('<h1>С такими данными найдено несколько покемонов</h1>')
 
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
 
-    requested_pokemon_entities = PokemonEntity.objects.filter(pokemon=requested_pokemon)
+    requested_pokemon_entities = requested_pokemon.entities.all()
     image_url = request.build_absolute_uri(requested_pokemon.image.url)
 
     previous_evolution = None
@@ -82,7 +83,7 @@ def show_pokemon(request, pokemon_id):
         except AttributeError:
             previous_evolution_image_url = None
         previous_evolution = {
-            'pokemon_id': pokemon_id - 1,
+            'pokemon_id': int(pokemon_id) - 1,
             'title_ru': requested_pokemon.previous_evolution.title_ru,
             'img_url': previous_evolution_image_url
         }
@@ -96,7 +97,7 @@ def show_pokemon(request, pokemon_id):
         except AttributeError:
             next_evolution_image_url = None
         next_evolution = {
-            'pokemon_id': pokemon_id + 1,
+            'pokemon_id': int(pokemon_id) + 1,
             'title_ru': title,
             'img_url': next_evolution_image_url
         }
