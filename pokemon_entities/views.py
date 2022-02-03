@@ -64,10 +64,9 @@ def show_pokemon(request, pokemon_id):
 
     try:
         requested_pokemon = Pokemon.objects.get(id=pokemon_id)
-    except ObjectDoesNotExist:
+    except Pokemon.ObjectDoesNotExist:
         return HttpResponseNotFound('<h1>Такой покемон не найден</h1>')
-    except MultipleObjectsReturned:
-        return HttpResponseNotFound('<h1>С такими данными найдено несколько покемонов</h1>')
+    
 
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
 
